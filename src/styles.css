@@ -65,6 +65,13 @@
     height: 100%;
   }
 
+  gl-root,
+  gl-shell,
+  gl-login-page {
+    display: block;
+    height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);

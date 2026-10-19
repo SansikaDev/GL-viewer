@@ -47,24 +47,109 @@
   </aside>
 
   <div class="flex min-w-0 flex-1 flex-col">
-    <header class="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur md:hidden">
-      <p class="font-display text-lg">GL Reconcile</p>
-      <button glBtn variant="ghost" size="sm" type="button" (click)="signOut()">Sign out</button>
+    <header
+      class="sticky top-0 z-30 flex items-center justify-between gap-3 bg-sidebar px-4 py-3 text-sidebar-foreground md:hidden"
+    >
+      <div class="flex min-w-0 items-center gap-3">
+        <div
+          class="flex size-9 items-center justify-center rounded-md bg-sidebar-primary font-display text-lg text-sidebar-primary-foreground"
+          aria-hidden="true"
+        >
+          GL
+        </div>
+        <div class="min-w-0">
+          <p class="font-display text-base leading-none">Reconcile</p>
+          <p class="mt-1 truncate text-[10px] uppercase tracking-[0.16em] text-sidebar-foreground/55">
+            Settlement desk
+          </p>
+        </div>
+      </div>
+      <button
+        class="inline-flex size-10 items-center justify-center rounded-md text-sidebar-foreground hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+        type="button"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-nav"
+        [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
+      >
+        <ng-icon [name]="menuOpen() ? 'lucideArrowLeft' : 'lucideMenu'" size="20" />
+      </button>
     </header>
-    <nav class="flex gap-1 overflow-x-auto border-b border-border px-3 py-2 md:hidden" aria-label="Mobile">
+
+    @if (menuOpen()) {
+      <div class="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
+        <button class="absolute inset-0 bg-ink/55" type="button" (click)="closeMenu()" aria-label="Close menu"></button>
+        <div
+          id="mobile-nav"
+          class="absolute inset-y-0 right-0 flex w-[min(18.5rem,88vw)] flex-col bg-sidebar text-sidebar-foreground shadow-2xl"
+        >
+          <div class="flex items-center justify-between px-5 py-5">
+            <p id="mobile-nav-title" class="font-display text-lg">Menu</p>
+            <button
+              class="inline-flex size-10 items-center justify-center rounded-md hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              type="button"
+              (click)="closeMenu()"
+              aria-label="Close menu"
+            >
+              <ng-icon name="lucideArrowLeft" size="18" />
+            </button>
+          </div>
+          <nav class="flex flex-1 flex-col gap-1 px-3" aria-label="Mobile">
+            @for (link of links; track link.path) {
+              <a
+                class="inline-flex h-11 items-center justify-start gap-2 rounded-md px-4 text-sm font-semibold text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+                [routerLink]="link.path"
+                routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground"
+                [routerLinkActiveOptions]="{ exact: link.exact }"
+                (click)="closeMenu()"
+              >
+                <ng-icon [name]="link.icon" size="16" />
+                {{ link.label }}
+              </a>
+            }
+          </nav>
+          <div class="border-t border-sidebar-border p-4">
+            <div class="mb-3 flex items-center gap-3">
+              <div class="flex size-9 items-center justify-center rounded-full bg-sidebar-accent font-medium">
+                {{ initials() }}
+              </div>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium">{{ user()?.name }}</p>
+                <p class="truncate text-xs text-sidebar-foreground/60">{{ user()?.role }}</p>
+              </div>
+            </div>
+            <button
+              class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-sidebar-accent text-sm font-semibold hover:bg-sidebar-accent/80 focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              type="button"
+              (click)="signOut()"
+            >
+              <ng-icon name="lucideLogOut" size="16" />
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <main class="flex-1 px-4 py-6 pb-24 sm:px-8 md:pb-6 lg:px-10">
+      <router-outlet />
+    </main>
+
+    <nav
+      class="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-sidebar-border bg-sidebar pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-sidebar-foreground md:hidden"
+      aria-label="Primary"
+    >
       @for (link of links; track link.path) {
         <a
-          class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          class="inline-flex min-h-11 flex-col items-center justify-center gap-1 px-2 text-[11px] font-semibold text-sidebar-foreground/65 hover:text-sidebar-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
           [routerLink]="link.path"
-          routerLinkActive="bg-muted font-medium"
+          routerLinkActive="text-sidebar-primary"
           [routerLinkActiveOptions]="{ exact: link.exact }"
         >
+          <ng-icon [name]="link.icon" size="18" />
           {{ link.label }}
         </a>
       }
     </nav>
-    <main class="flex-1 px-4 py-6 sm:px-8 lg:px-10">
-      <router-outlet />
-    </main>
   </div>
 </div>

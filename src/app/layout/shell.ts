@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../core/auth';
 import { GlButton } from '../ui/button';
 
@@ -9,11 +11,15 @@ import { GlButton } from '../ui/button';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NgIcon, GlButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.html',
+  host: {
+    class: 'block h-full',
+  },
 })
 export class Shell {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
+  protected readonly menuOpen = signal(false);
   protected readonly user = this.auth.user;
   protected readonly initials = computed(() => {
     const name = this.user()?.name ?? '';
@@ -31,7 +37,25 @@ export class Shell {
     { path: '/reconcile', label: 'Reconcile', icon: 'lucideScale', exact: true },
   ];
 
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.menuOpen.set(false));
+  }
+
+  protected toggleMenu(): void {
+    this.menuOpen.update((open) => !open);
+  }
+
+  protected closeMenu(): void {
+    this.menuOpen.set(false);
+  }
+
   protected signOut(): void {
+    this.closeMenu();
     this.auth.logout();
     void this.router.navigateByUrl('/login');
   }

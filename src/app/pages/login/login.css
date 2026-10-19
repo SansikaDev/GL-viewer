@@ -1,0 +1,128 @@
+:host {
+  --login-mercury: oklch(0.88 0.018 250);
+  --login-mercury-mid: oklch(0.58 0.035 255);
+  display: block;
+  min-height: 100dvh;
+}
+
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--login-mercury), var(--login-mercury-mid));
+  filter: blur(22px);
+  box-shadow:
+    inset -10px -10px 22px oklch(0.12 0.04 255 / 0.55),
+    12px 12px 28px oklch(0.96 0.01 250 / 0.16);
+  animation: login-float 20s infinite alternate ease-in-out;
+  transition: margin 100ms ease-out;
+}
+
+.login-group {
+  transition: transform 400ms cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.login-group:focus-within {
+  transform: translateX(8px);
+}
+
+.login-group input {
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  border-bottom: 1px solid oklch(1 0 0 / 0.14);
+  background: transparent;
+  color: var(--sidebar-foreground);
+  outline: none;
+  transition: border-color 400ms ease-out;
+}
+
+.login-group input::placeholder {
+  color: oklch(0.96 0.008 250 / 0.32);
+}
+
+.login-group input:focus {
+  border-bottom-color: transparent;
+}
+
+.login-group input:-webkit-autofill {
+  -webkit-text-fill-color: var(--sidebar-foreground);
+  caret-color: var(--sidebar-foreground);
+  box-shadow: 0 0 0 1000px var(--ink) inset;
+  transition: background-color 9999s ease-out;
+}
+
+.login-glow {
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  width: 0;
+  background: var(--login-mercury);
+  box-shadow: 0 0 16px var(--login-mercury);
+  transition: width 600ms cubic-bezier(0.2, 1, 0.3, 1);
+}
+
+.login-group:focus-within .login-glow,
+.login-group.is-invalid .login-glow {
+  width: 100%;
+}
+
+.login-group.is-invalid .login-glow {
+  background: var(--destructive);
+  box-shadow: 0 0 14px color-mix(in oklch, var(--destructive) 70%, white);
+}
+
+.login-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 0.75rem;
+  background: var(--login-mercury);
+  transform: scale(1);
+  transition:
+    transform 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    filter 500ms ease-out;
+}
+
+.login-submit:hover .login-drop,
+.login-submit:focus-within .login-drop {
+  filter: brightness(1.12);
+  transform: scale(1.04, 1.16);
+}
+
+.login-go {
+  letter-spacing: 0.14em;
+}
+
+.login-go:hover:not(:disabled) {
+  letter-spacing: 0.22em;
+}
+
+@keyframes login-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(8vw, 14vh) scale(1.18);
+  }
+  66% {
+    transform: translate(-6vw, 8vh) scale(0.86);
+  }
+  100% {
+    transform: translate(4vw, -8vh) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-blob,
+  .login-group,
+  .login-glow,
+  .login-drop,
+  .login-go {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .login-group:focus-within {
+    transform: none;
+  }
+}
