@@ -1,0 +1,70 @@
+<div class="flex min-h-full">
+  <aside class="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
+    <div class="flex items-center gap-3 px-5 py-6">
+      <div
+        class="flex size-9 items-center justify-center rounded-md bg-sidebar-primary font-display text-lg text-sidebar-primary-foreground"
+        aria-hidden="true"
+      >
+        GL
+      </div>
+      <div>
+        <p class="font-display text-lg leading-none">Reconcile</p>
+        <p class="mt-1 text-[11px] uppercase tracking-[0.18em] text-sidebar-foreground/55">Settlement desk</p>
+      </div>
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 px-3" aria-label="Primary">
+      @for (link of links; track link.path) {
+        <a
+          class="inline-flex h-10 items-center justify-start gap-2 rounded-md px-4 text-sm font-semibold text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          [routerLink]="link.path"
+          routerLinkActive="bg-sidebar-accent text-sidebar-accent-foreground"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+        >
+          <ng-icon [name]="link.icon" size="16" />
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+
+    <div class="mt-auto border-t border-sidebar-border p-4">
+      <div class="flex items-center gap-3">
+        <div
+          class="flex size-9 items-center justify-center rounded-full bg-sidebar-accent font-medium"
+          aria-hidden="true"
+        >
+          {{ initials() }}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-medium">{{ user()?.name }}</p>
+          <p class="truncate text-xs text-sidebar-foreground/60">{{ user()?.role }}</p>
+        </div>
+        <button glBtn variant="sidebar" size="icon-sm" type="button" (click)="signOut()" aria-label="Sign out">
+          <ng-icon name="lucideLogOut" size="16" />
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur md:hidden">
+      <p class="font-display text-lg">GL Reconcile</p>
+      <button glBtn variant="ghost" size="sm" type="button" (click)="signOut()">Sign out</button>
+    </header>
+    <nav class="flex gap-1 overflow-x-auto border-b border-border px-3 py-2 md:hidden" aria-label="Mobile">
+      @for (link of links; track link.path) {
+        <a
+          class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          [routerLink]="link.path"
+          routerLinkActive="bg-muted font-medium"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+        >
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+    <main class="flex-1 px-4 py-6 sm:px-8 lg:px-10">
+      <router-outlet />
+    </main>
+  </div>
+</div>

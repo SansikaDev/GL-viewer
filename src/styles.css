@@ -1,3 +1,249 @@
-/* You can add global styles to this file, and also import other style files */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+@import '@spartan-ng/brain/hlm-tailwind-preset.css';
 
-@import 'tailwindcss';
+:root {
+  color-scheme: light;
+  --font-sans: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-display: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius: 0.5rem;
+
+  --background: oklch(0.968 0.006 250);
+  --foreground: oklch(0.22 0.032 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.032 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.032 255);
+  --primary: oklch(0.32 0.07 255);
+  --primary-foreground: oklch(0.99 0.004 250);
+  --secondary: oklch(0.945 0.01 250);
+  --secondary-foreground: oklch(0.26 0.04 255);
+  --muted: oklch(0.95 0.008 250);
+  --muted-foreground: oklch(0.47 0.02 250);
+  --accent: oklch(0.935 0.018 250);
+  --accent-foreground: oklch(0.26 0.04 255);
+  --destructive: oklch(0.48 0.16 27);
+  --border: oklch(0.9 0.012 250);
+  --input: oklch(0.9 0.012 250);
+  --ring: oklch(0.4 0.07 255);
+  --sidebar: oklch(0.22 0.045 255);
+  --sidebar-foreground: oklch(0.96 0.008 250);
+  --sidebar-primary: oklch(0.99 0.004 250);
+  --sidebar-primary-foreground: oklch(0.22 0.045 255);
+  --sidebar-accent: oklch(0.3 0.05 255);
+  --sidebar-accent-foreground: oklch(0.99 0.004 250);
+  --sidebar-border: oklch(0.3 0.04 255);
+  --sidebar-ring: oklch(0.72 0.05 250);
+  --chart-1: oklch(0.36 0.08 255);
+  --chart-2: oklch(0.5 0.055 220);
+  --chart-3: oklch(0.46 0.06 190);
+  --chart-4: oklch(0.55 0.03 250);
+  --chart-5: oklch(0.4 0.04 30);
+  --success: oklch(0.44 0.08 165);
+  --warning: oklch(0.6 0.12 70);
+  --ink: oklch(0.2 0.04 255);
+}
+
+@theme inline {
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-ink: var(--ink);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background-image: linear-gradient(180deg, oklch(0.975 0.008 250), oklch(0.96 0.006 250));
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  a {
+    transition:
+      background-color 180ms ease-out,
+      color 180ms ease-out,
+      border-color 180ms ease-out,
+      box-shadow 180ms ease-out,
+      opacity 180ms ease-out,
+      transform 180ms ease-out;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.enter {
+  animation: fade-up 420ms ease-out both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+
+.row-in {
+  animation: fade-up 280ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.chart-bar {
+  transform-origin: bottom;
+  animation: grow-y 520ms ease-out both;
+  animation-delay: calc(var(--i, 0) * 16ms);
+}
+
+.mix-seg {
+  transform-origin: left center;
+  animation: grow-x 560ms ease-out both;
+}
+
+.mix-ring {
+  box-shadow:
+    0 0 0 1px oklch(0.22 0.03 255 / 0.06),
+    0 18px 36px oklch(0.22 0.04 255 / 0.08);
+  animation: mix-in 240ms ease-out both;
+}
+
+@keyframes mix-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.lift {
+  transition:
+    transform 180ms ease-out,
+    box-shadow 180ms ease-out,
+    border-color 180ms ease-out,
+    background-color 180ms ease-out;
+}
+
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px oklch(0.22 0.04 255 / 0.08);
+}
+
+.drop-hot {
+  transform: scale(1.01);
+  border-color: var(--primary);
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent);
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.toast-panel {
+  animation: toast-in 220ms ease-out both;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter,
+  .row-in,
+  .chart-bar,
+  .mix-seg,
+  .mix-ring,
+  .toast-panel,
+  .skeleton::after {
+    animation: none !important;
+  }
+
+  .lift:hover {
+    transform: none;
+  }
+}

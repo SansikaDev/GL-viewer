@@ -1,0 +1,206 @@
+<div class="mx-auto max-w-6xl space-y-8">
+  <div class="enter flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Matching</p>
+      <h1 class="font-display mt-1 text-4xl">Reconcile the day</h1>
+      <p class="mt-2 max-w-2xl text-sm text-muted-foreground">
+        Upload a processor or bank settlement file. We match it to payments already in GL Reconcile and surface the
+        rows that never landed in the application.
+      </p>
+    </div>
+    <div class="space-y-1">
+      <label glLabel for="recon-day">Business day</label>
+      <input glInput id="recon-day" type="date" [ngModel]="day()" (ngModelChange)="day.set($event)" />
+    </div>
+  </div>
+
+  <section
+    class="enter rounded-2xl border border-dashed border-border bg-card p-6 transition-colors sm:p-10"
+    style="--d: 70"
+    [class.drop-hot]="dragging()"
+    [class.border-primary]="loading()"
+    [class.bg-muted/40]="dragging()"
+    (dragover)="$event.preventDefault(); dragging.set(true)"
+    (dragleave)="dragging.set(false)"
+    (drop)="onDrop($event)"
+  >
+    <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-start gap-4">
+        <div class="flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          @if (loading()) {
+            <ng-icon name="lucideLoaderCircle" size="20" class="animate-spin" />
+          } @else {
+            <ng-icon name="lucideUpload" size="20" />
+          }
+        </div>
+        <div>
+          <h2 class="font-display text-2xl">{{ loading() ? stage() : 'Drop a settlement CSV' }}</h2>
+          <p class="mt-1 max-w-lg text-sm text-muted-foreground">
+            Columns we read: date, amount, reference, description, method, processor. Max 2 MB. Matching uses
+            reference first, then amount + date + counterparty.
+          </p>
+          <p class="mt-2 text-xs text-muted-foreground">
+            {{ formatDay(day()) }} currently has {{ appCount() }} payments in the application.
+          </p>
+          @if (loading()) {
+            <div class="mt-4 h-1.5 w-64 overflow-hidden rounded-full bg-muted">
+              <div class="h-full rounded-full bg-primary transition-all duration-200" [style.width.%]="progress()"></div>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <label glBtn class="cursor-pointer">
+          Choose file
+          <input class="sr-only" type="file" accept=".csv,text/csv" (change)="onFileInput($event)" />
+        </label>
+        <button glBtn variant="outline" type="button" [disabled]="loading()" (click)="loadSample()">
+          @if (loading()) {
+            <ng-icon name="lucideLoaderCircle" size="16" class="animate-spin" />
+          } @else {
+            <ng-icon name="lucideFileSpreadsheet" size="16" />
+          }
+          Run sample report
+        </button>
+        <button glBtn variant="ghost" type="button" (click)="downloadSample()">
+          <ng-icon name="lucideDownload" size="16" />
+          Download sample
+        </button>
+      </div>
+    </div>
+  </section>
+
+  @if (error(); as message) {
+    <div glAlert variant="danger" class="enter">
+      <ng-icon name="lucideCircleAlert" size="16" />
+      <p>{{ message }}</p>
+    </div>
+  }
+
+  @if (result(); as current) {
+    <section class="grid gap-4 sm:grid-cols-3">
+      <article glCard class="enter lift" style="--d: 40">
+        <div glCardContent>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Not in the app</p>
+          <p class="text-3xl"><gl-count [value]="current.missingInApp.length" /></p>
+          <p class="text-xs text-muted-foreground">On {{ current.fileName }}, missing from GL Reconcile.</p>
+        </div>
+      </article>
+      <article glCard class="enter lift" style="--d: 90">
+        <div glCardContent>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Not on the file</p>
+          <p class="text-3xl"><gl-count [value]="current.missingInReport.length" /></p>
+          <p class="text-xs text-muted-foreground">Posted here, absent from the upload.</p>
+        </div>
+      </article>
+      <article glCard class="enter lift" style="--d: 140">
+        <div glCardContent>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Matched</p>
+          <p class="text-3xl"><gl-count [value]="current.matched.length" /></p>
+          <p class="text-xs text-muted-foreground">
+            {{ current.reportCount }} file rows · {{ current.appCount }} in-app
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap gap-2">
+        <button glBtn [variant]="tab() === 'missing-in-app' ? 'default' : 'outline'" size="sm" type="button" (click)="tab.set('missing-in-app')">
+          Missing in app
+          <span glBadge [variant]="tab() === 'missing-in-app' ? 'secondary' : 'outline'">{{ current.missingInApp.length }}</span>
+        </button>
+        <button glBtn [variant]="tab() === 'missing-in-report' ? 'default' : 'outline'" size="sm" type="button" (click)="tab.set('missing-in-report')">
+          Missing on file
+          <span glBadge [variant]="tab() === 'missing-in-report' ? 'secondary' : 'outline'">{{
+            current.missingInReport.length
+          }}</span>
+        </button>
+        <button glBtn [variant]="tab() === 'matched' ? 'default' : 'outline'" size="sm" type="button" (click)="tab.set('matched')">
+          Matched
+          <span glBadge [variant]="tab() === 'matched' ? 'secondary' : 'outline'">{{ current.matched.length }}</span>
+        </button>
+      </div>
+      <button glBtn variant="outline" size="sm" type="button" (click)="exportOpenItems()">
+        <ng-icon name="lucideDownload" size="14" />
+        Export open items
+      </button>
+    </div>
+
+    @if (tab() === 'missing-in-app') {
+      <div glAlert variant="warning" class="enter">
+        <ng-icon name="lucideTriangleAlert" size="16" />
+        <p>These bank/processor rows never posted as payments in the application. Investigate origin or create the missing ticket.</p>
+      </div>
+    }
+    @if (tab() === 'missing-in-report') {
+      <div glAlert class="enter">
+        <ng-icon name="lucideCircleAlert" size="16" />
+        <p>These application payments are not on the uploaded file - often pending, failed, or sitting on tomorrow's settlement.</p>
+      </div>
+    }
+
+    @if (rows().length === 0) {
+      <div class="rounded-xl border border-dashed border-border py-14 text-center">
+        <p class="font-display text-2xl">Nothing in this bucket</p>
+      </div>
+    } @else {
+      <div glTableWrap class="enter">
+        <table glTable>
+          <thead glTHead>
+            <tr glTRow>
+              <th glTh>
+                <button glSort [active]="sortKey() === 'reference'" [dir]="sortDir()" (click)="sortBy('reference')">
+                  Reference
+                </button>
+              </th>
+              <th glTh>
+                <button glSort [active]="sortKey() === 'party'" [dir]="sortDir()" (click)="sortBy('party')">
+                  Counterparty
+                </button>
+              </th>
+              <th glTh>
+                <button glSort [active]="sortKey() === 'amount'" [dir]="sortDir()" (click)="sortBy('amount')">Amount</button>
+              </th>
+              <th glTh>Why</th>
+              <th glTh></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track referenceOf(row) + (row.payment?.id || row.report?.id); let i = $index) {
+              <tr glTRow class="row-in" [style.--i]="i">
+                <td glTd class="font-mono">{{ referenceOf(row) }}</td>
+                <td glTd>
+                  {{ partyOf(row) }}
+                  @if (row.payment) {
+                    <p class="text-xs text-muted-foreground">{{ row.payment.processor }} · {{ row.payment.method }}</p>
+                  }
+                </td>
+                <td glTd class="font-mono">{{ money(amountOf(row)) }}</td>
+                <td glTd class="max-w-sm text-muted-foreground">{{ row.reason }}</td>
+                <td glTd>
+                  @if (row.payment) {
+                    <div class="flex items-center justify-end gap-2">
+                      <gl-status [status]="row.payment.status" />
+                      <a glBtn variant="ghost" size="sm" [routerLink]="['/payments', row.payment.id]">Open</a>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (toast(); as message) {
+    <div
+      class="toast-panel fixed right-5 bottom-5 z-40 flex max-w-sm items-start gap-3 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-lg"
+      role="status"
+    >
+      <ng-icon name="lucideCircleCheck" size="18" class="mt-0.5 text-success" />
+      <p>{{ message }}</p>
+    </div>
+  }
+</div>
