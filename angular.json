@@ -87,6 +87,26 @@
             }
           },
           "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "buildTarget": "gl-reconcile:build:development",
+            "runner": "vitest",
+            "providersFile": "src/test-providers.ts"
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "coverage": true,
+              "coverageReporters": ["text", "lcov", "cobertura"],
+              "reporters": [
+                "default",
+                ["junit", { "outputFile": "reports/junit.xml", "suiteName": "GL Reconcile" }]
+              ]
+            }
+          }
         }
       }
     }
