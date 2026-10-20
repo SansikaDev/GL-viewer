@@ -12,7 +12,7 @@ concurrency:
 jobs:
   verify:
     name: Test and build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
@@ -25,15 +25,14 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Enable Corepack
+      - name: Use project npm
         run: |
-          corepack enable
-          corepack prepare npm@11.6.2 --activate
+          npm install -g npm@11.6.2
           node -v
           npm -v
 
       - name: Install
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Format
         run: npm run format:check
