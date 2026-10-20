@@ -25,6 +25,13 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare npm@11.6.2 --activate
+          node -v
+          npm -v
+
       - name: Install
         run: npm ci
 
@@ -35,20 +42,20 @@ jobs:
         run: npm run test:ci
 
       - name: Upload JUnit report
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: junit-results
           path: reports/junit.xml
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Upload coverage
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
       - name: Production build
         run: npm run build
